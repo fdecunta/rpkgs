@@ -1,0 +1,253 @@
+---
+title: "Experiment 2024: total biomass"
+author: fd
+---
+
+```{r}
+source("config.R")
+```
+
+```{r}
+library(lattice)
+library(nlme)
+library(emmeans)
+library(multcomp)
+library(ggplot2)
+```
+
+```{r}
+dat <- read.csv("../data/data_exp2024.csv")
+
+dat[["endophyte"]] <- as.factor(dat[["endophyte"]])
+dat[["root_herb"]] <- as.factor(dat[["root_herb"]])
+dat[["foliar_herb"]] <- as.factor(dat[["foliar_herb"]])
+dat[["bloque"]] <- as.factor(dat[["bloque"]])
+
+dat[["shoot_root"]] <- dat$ag_biomass / dat$root_biomass
+dat[["total_biom"]] <- dat$ag_biomass + dat$root_biomass
+```
+
+## Total Biomass
+
+```{r}
+summary(dat[["total_biom"]])
+```
+
+```{r}
+dotchart(dat[["total_biom"]])
+```
+
+```{r}
+coplot(total_biom ~ endophyte | root_herb * foliar_herb, data = dat)
+```
+
+### Modelling
+
+```{r}
+options(contrasts = c("contr.sum", "contr.poly"))
+```
+
+#### Variance structure selection (ML)
+
+```{r}
+totbiom_0 <- lme(total_biom ~ endophyte * root_herb * foliar_herb,
+            random = ~ 1 | bloque,
+            method = "ML",
+            data = dat)
+
+totbiom_1 <- lme(total_biom ~ endophyte * root_herb * foliar_herb,
+            random = ~ 1 | bloque,
+            weights = varIdent(form = ~ 1 | endophyte),
+            method = "ML",
+            data = dat)
+
+totbiom_2 <- lme(total_biom ~ endophyte * root_herb * foliar_herb,
+            random = ~ 1 | bloque,
+            weights = varIdent(form = ~ 1 | root_herb),
+            method = "ML",
+            data = dat)
+
+totbiom_3 <- lme(total_biom ~ endophyte * root_herb * foliar_herb,
+            random = ~ 1 | bloque,
+            weights = varIdent(form = ~ 1 | endophyte * foliar_herb),
+            method = "ML",
+            data = dat)
+
+AIC(totbiom_0, totbiom_1, totbiom_2, totbiom_3)
+```
+
+#### Final model
+
+```{r}
+total_biom_res <- lme(total_biom ~ endophyte * root_herb * foliar_herb,
+                        random = ~ 1 | bloque,
+                        weights = varIdent(form = ~ 1 | endophyte * foliar_herb),                
+                        method = "REML",
+                        data = dat)
+```
+
+### Check Assumptions
+
+```{r}
+E <- residuals(total_biom_res, type = "normalized")
+```
+
+```{r}
+origpar <- par(no.readonly = TRUE)
+par(mfrow = c(1, 2))
+plot(E ~ fitted(total_biom_res),
+     xlab = "Fitted values", ylab = "Normalized residuals")
+qqnorm(E); qqline(E)
+par(origpar)
+```
+
+```{r}
+par(mfrow = c(2, 2))
+boxplot(E ~ dat$endophyte,   main = "by endophyte")
+boxplot(E ~ dat$root_herb,   main = "by root herbivory")
+boxplot(E ~ dat$foliar_herb, main = "by foliar herbivory")
+boxplot(E ~ dat$bloque,      main = "by block")
+par(origpar)
+```
+
+```{r}
+shapiro.test(E)
+```
+
+### Inference
+
+```{r}
+summary(total_biom_res)
+```
+
+```{r, warning=FALSE}
+car::Anova(total_biom_res, type = "III")
+```
+
+### Marginal Means
+
+```{r}
+emmeans(total_biom_res, pairwise ~ endophyte * foliar_herb, adjust = "tukey")
+
+emmeans(total_biom_res, pairwise ~ endophyte, adjust = "tukey")
+
+emmeans(total_biom_res, pairwise ~ foliar_herb, adjust = "tukey")
+```
+
+
+```{r}
+cld(
+    emmeans(total_biom_res, pairwise ~ endophyte * foliar_herb, adjust = "tukey"),
+    sort = FALSE,
+    Letters = LETTERS
+)
+```
+
+```{r fig-total-biomass, fig.width=7, fig.height=4}
+plot_total_biomass <- function() {
+    par(
+        mar = c(4, 4, 1, 1), 
+        mgp = c(2.5, 1, 0), 
+        cex.axis = 0.9
+    )
+
+    emm <- emmeans(total_biom_res, ~ endophyte * foliar_herb)
+    df <- as.data.frame(cld(emm, Letters = LETTERS, sort = FALSE))
+    df[[".group"]] <- gsub(" ", "", df[[".group"]])
+
+    stripchart(
+        total_biom ~ endophyte * foliar_herb,
+        data = dat,
+        method = "jitter",
+        ylim = c(5, 25),
+        jitter = 0.15,
+        vertical = TRUE,
+        pch = 19,
+        ylab = labels$total_biom,
+        xlab = labels$foliar_herb,
+        col = adjustcolor(colors$endo, alpha.f = 0.2),
+        axes = FALSE
+    )
+
+    axis(side = 2, lwd = 0, lwd.ticks = 0.6, las = 1)
+
+    axis(
+        side = 1,
+        at = c(1.5, 3.5),
+        labels = c("No", "Yes"),
+        lwd = 0,
+        lwd.ticks = 0.6
+    )
+
+    box(bty = "o", lwd = 0.6)
+
+    abline(v = 2.5, lty = "dashed")
+
+    arrows(
+        x0 = 1:nrow(df),
+        y0 = df$emmean - df$SE,
+        x1 = 1:nrow(df),
+        y1 = df$emmean + df$SE,
+        length = 0.05,
+        angle = 90,
+        code = 3,
+        lwd = 1.5
+    )
+
+    points(
+        x = 1:nrow(df),
+        y = df$emmean,
+        pch = 21,
+        cex = 1.5,
+        lwd = 1.5,
+        bg = colors$endo,
+        col = "black"
+    )
+
+    text(
+        x = 1:nrow(df),
+        y = df$emmean + df$SE + 0.5,
+        labels = df[[".group"]],
+        pos = 3,
+        cex = 0.9
+    )
+
+    legend(
+        "topright",
+        legend = c("E-", "E+"),
+        pt.bg = colors$endo,
+        pch = 21,
+        pt.cex = 1.1,
+        bty = "n"
+    )
+
+    par(origpar)
+}
+
+plot_total_biomass()
+```
+
+
+```{r}
+w <- 3.5
+h <- 3.5
+
+pdf(
+  file = "../figures/pdf/fig_total_biom.pdf",
+  width = w,
+  height = h
+)
+plot_total_biomass()
+dev.off()
+
+png(
+  file = "../figures/png/fig_total_biom.png",
+  units = "in",
+  res = 300,
+  width = w,
+  height = h
+)
+plot_total_biomass()
+dev.off()
+```
+

@@ -44,16 +44,9 @@ main <- function()
 	args <- strsplit(args, "nextArg", fixed=TRUE)[[1L]][-1L]
 
 	Hflag <- TRUE
-#	dflag <- TRUE
 	dflag <- FALSE
 	rflag <- FALSE
-#	vflag <- TRUE
 	vflag <- FALSE
-
-	# TODO: remove this
-	if (length(args) == 0) {
-		args <- c("tests/00_clean_dabderus.R", "tests/Bad Name.R")
-	}
 
 	pkgs <- lapply(args, scan_file)
 	names(pkgs) <- args

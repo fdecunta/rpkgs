@@ -43,9 +43,12 @@ main <- function()
 	args <- paste(args, collapse=" ")
 	args <- strsplit(args, "nextArg", fixed=TRUE)[[1L]][-1L]
 
-	dflag <- 1
-	rflag <- 0
-	vflag <- 1
+	Hflag <- TRUE
+#	dflag <- TRUE
+	dflag <- FALSE
+	rflag <- FALSE
+#	vflag <- TRUE
+	vflag <- FALSE
 
 	# TODO: remove this
 	if (length(args) == 0) {
@@ -71,16 +74,23 @@ main <- function()
 
 	for (f in args) {
 		for (p in pkgs[[f]]) {
-			line <- paste(f, p, sep=":")
-			if (vflag) line <- paste(line, version[[p]], sep=":")
+			line <- p
+			
+			if (Hflag)
+				line <- paste(f, p, sep=":")
+
+			if (vflag) 
+				line <- paste(line, version[[p]], sep=":")
 
 			if (dflag) {
 				for (d in deps[[p]]) {
-					depline <- paste(line, d, sep=":")
+					dline <- paste(line, d, sep=":")
 					if (vflag) 
-						depline <- paste(depline, version[[d]], sep=":")
-					writeLines(depline)
+						dline <- paste(dline, version[[d]], sep=":")
+					writeLines(dline)
 				}
+			} else {
+				writeLines(line)
 			}
 		}
 	}

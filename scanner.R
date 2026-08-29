@@ -25,7 +25,15 @@ scan_pkgs <- function(x)
 scan_file <- function(f)
 {
 	parsed <- parse(file = f, srcfile = srcfile(f))    
-	unlist(sapply(parsed, scan_pkgs))
+	all_pkgs <- unlist(sapply(parsed, scan_pkgs))
+
+	# TODO:
+	# here should handle:
+	# - print line
+	# - dependencies
+	# - recursive
+	
+	unique(all_pkgs)
 }
 
 main <- function()

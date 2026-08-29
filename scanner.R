@@ -1,12 +1,6 @@
-require(tools)
+# Scan R files looking for packages names.
 
-## need to clean Rmd fiels first.
-## my_file <- "03_total_biomass.Rmd"
-
-my_file <- "03_total_biomass.R"
-
-parsed <- parse(file = my_file, srcfile = srcfile(my_file))    
-
+require(tools, quietly = TRUE)
 
 scan_pkgs <- function(x)
 {
@@ -24,6 +18,20 @@ scan_pkgs <- function(x)
     ret
 }
 
-unlist(sapply(parsed, scan_pkgs))
+args <- commandArgs(TRUE)
+args <- paste(args, collapse=" ")
+args <- strsplit(args, "nextArg", fixed=TRUE)[[1L]][-1L]
+args <- trimws(args)
 
-match.arg(TRUE)
+
+scan_file <- function(f)
+{
+	parsed <- parse(file = f, srcfile = srcfile(f))    
+	unlist(sapply(parsed, scan_pkgs))
+}
+
+pkgs <- lapply(args, scan_file)
+names(pkgs) <- args
+
+print(pkgs)
+

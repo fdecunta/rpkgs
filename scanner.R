@@ -65,26 +65,23 @@ main <- function()
 			unlist(unique(pkgs)),
 			if (dflag) unlist(unique(deps))
 		)
-		ver <- lapply(all_pkgs, get_pkg_version)
-		names(ver) <- all_pkgs
+		version <- lapply(all_pkgs, get_pkg_version)
+		names(version) <- all_pkgs
 	}
-
-	browser()
-		
-	# construct output data
 
 	for (f in args) {
 		for (p in pkgs[[f]]) {
-			rec <- list(
-				"file" = f,
-				"pkg"  = p,
-				"dep" = if (dflag) deps[[p]] else NULL
-			)
+			line <- paste(f, p, sep=":")
+			if (vflag) line <- paste(line, version[[p]], sep=":")
 
-			# need to add version to dependencies?
-
-			browser()
-			writeLines(sprintf("%s:%s:%s", f, p, v))
+			if (dflag) {
+				for (d in deps[[p]]) {
+					depline <- paste(line, d, sep=":")
+					if (vflag) 
+						depline <- paste(depline, version[[d]], sep=":")
+					writeLines(depline)
+				}
+			}
 		}
 	}
 }

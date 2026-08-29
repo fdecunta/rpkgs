@@ -4,8 +4,10 @@
 #
 # usage:
 
+R_OPTIONS="--no-echo --no-save"
+
 usage() {
-	echo "usage: rpkgs [-dHr] file ..."
+	echo "usage: rpkgs [-dHrv] file ..."
 	echo ""
 	echo "Scan R files for packages used."
 	echo ""
@@ -13,19 +15,21 @@ usage() {
 	echo "  -H  print filename for each package"
 	echo "  -d  show dependencies"
 	echo "  -r  show recursive dependencies (implies -d)"
+	echo "  -v  show package version"
 }
-
 
 Hflag=
 dflag=
 rflag=
+vflag=
 
 while getopts "dHhr" arg
 do
 	case $arg in
 	d) 	dflag=1;;
 	H) 	Hflag=1;;
-	r) 	rflag=1; dflag=1;; # r implies d
+	r) 	rflag=1; dflag=1;;   # r implies d
+	v) 	vflag=1;;
 	h) 	usage; exit 0;;
 	?) 	usage>&2; exit 1;;
 	esac
@@ -46,7 +50,8 @@ while test -n "${1}"; do
 	shift
 done
 
-Rscript scanner.R --args "$args"
+
+Rscript ${R_OPTIONS} scanner.R --args ${args}
+
+
 # R --no-restore --no-echo --args "$args"
-
-

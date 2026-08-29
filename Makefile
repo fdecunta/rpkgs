@@ -1,2 +1,2 @@
-run: rpkgs_scan.sh
-	sh ./rpkgs_scan.sh -d tests/*.R
+run: rpkgs.sh scanner.R
+	@sh ./rpkgs.sh -r tests/*.R

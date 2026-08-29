@@ -2,7 +2,7 @@
 
 require(tools, quietly = TRUE)
 
-scan_pkgs <- function(x)
+find_pkgs <- function(x)
 {
     ret <- c()
     if (any(grepl("library", x, fixed = TRUE))) {
@@ -13,27 +13,28 @@ scan_pkgs <- function(x)
     }
     if (any(i <- grepl("::", x, fixed = TRUE))) {
 	pkg_pattern <- "([a-zA-Z][a-zA-Z0-9._]*)::"
-	match_i <- gregexpr(pkg_pattern, as.character(x[i]), perl = TRUE)
-	matches <- regmatches(as.character(x[i]), match_i)
-	pkgs <- lapply(matches, function(s) sub("::$", "", s))
-        ret <- c(ret, pkgs)
+	m <- gregexpr(pkg_pattern, as.character(x[i]), perl = TRUE)
+	raw_pkg <- regmatches(as.character(x[i]), m)
+	pkgs <- lapply(raw_pkg, function(s) sub("::$", "", s))
+        ret <- c(ret, unlist(pkgs))
     }
     ret
 }
 
-
 scan_file <- function(f)
 {
 	parsed <- parse(file = f, srcfile = srcfile(f))    
-	all_pkgs <- unlist(sapply(parsed, scan_pkgs))
-
-	# TODO:
-	# here should handle:
-	# - print line
-	# - dependencies
-	# - recursive
-	
+	all_pkgs <- unique(unlist(lapply(parsed, find_pkgs)))
 	unique(all_pkgs)
+}
+
+get_pkg_version <- function(pkg)
+{
+	if (length(find.package(pkg, quiet=TRUE)) > 0) {
+		packageVersion(pkg) 
+	} else {
+		""
+	}
 }
 
 main <- function()
@@ -41,17 +42,51 @@ main <- function()
 	args <- commandArgs(TRUE)
 	args <- paste(args, collapse=" ")
 	args <- strsplit(args, "nextArg", fixed=TRUE)[[1L]][-1L]
-	args <- trimws(args)
 
+	dflag <- 1
+	rflag <- 0
+	vflag <- 1
+
+	# TODO: remove this
 	if (length(args) == 0) {
-		args <- c("tests/00_clean_dabderus.R")
+		args <- c("tests/00_clean_dabderus.R", "tests/Bad Name.R")
 	}
 
 	pkgs <- lapply(args, scan_file)
 	names(pkgs) <- args
 
-	print(pkgs)
-}
+	if (dflag) {
+		deps <- package_dependencies(unlist(unique(pkgs)), recursive = rflag)
+		names(deps) <- unlist(unique(pkgs))
+	} 
 
+	if (vflag) {
+		all_pkgs <- c(
+			unlist(unique(pkgs)),
+			if (dflag) unlist(unique(deps))
+		)
+		ver <- lapply(all_pkgs, get_pkg_version)
+		names(ver) <- all_pkgs
+	}
+
+	browser()
+		
+	# construct output data
+
+	for (f in args) {
+		for (p in pkgs[[f]]) {
+			rec <- list(
+				"file" = f,
+				"pkg"  = p,
+				"dep" = if (dflag) deps[[p]] else NULL
+			)
+
+			# need to add version to dependencies?
+
+			browser()
+			writeLines(sprintf("%s:%s:%s", f, p, v))
+		}
+	}
+}
 
 main()

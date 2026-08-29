@@ -25,3 +25,5 @@ scan_pkgs <- function(x)
 }
 
 unlist(sapply(parsed, scan_pkgs))
+
+match.arg(TRUE)

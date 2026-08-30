@@ -1,3 +1,17 @@
+- Error when piping with 'head': 
+
+```
+$ rpkgs test_files/*.R | head -5
+ENMeval
+geodata
+terra
+predicts
+usdm
+Error in writeLines(line) : ignoring SIGPIPE signal
+Calls: <Anonymous> -> writeLines
+Execution halted
+```
+
 - Add tests.
 - Add '-' for reading from stdin
 - Handle library when find inside a function

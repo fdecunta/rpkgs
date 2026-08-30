@@ -14,27 +14,24 @@ usage() {
 	echo "  -v  package version"
 }
 
-Hflag=
-dflag=
-rflag=
-vflag=
+# The weird way of parsing args comes from base R scripts (INSTALL, check, etc.) 
+# 'args' list should be passed as _one_ argument to R, where it is handled
+# with 'commandArgs'. 
 
-while getopts "dHhr" arg
+flags=
+
+while getopts "dHhrv" arg
 do
 	case $arg in
-	d) 	dflag=1;;
-	H) 	Hflag=1;;
-	r) 	rflag=1; dflag=1;;   # r implies d
-	v) 	vflag=1;;
+	d) 	flags="${flags}d";;
+	H) 	flags="${flags}H";;
+	r) 	flags="${flags}rd";;  # r implies d
+	v) 	flags="${flags}v";;
 	h) 	usage; exit 0;;
 	?) 	usage>&2; exit 1;;
 	esac
 done
 shift $(($OPTIND - 1))
-
-# The weird way of parsing args comes from base R scripts (INSTALL, check, etc.) 
-# 'args' list should be passed as _one_ argument to R, where it is handled
-# with 'commandArgs'. 
 
 args=
 while test -n "${1}"; do
@@ -52,4 +49,4 @@ if test -z "${args}"; then
 	exit 1
 fi
 
-echo 'scanpkgs::scan_pkgs()' | R ${R_OPTIONS} --args "$args"
+echo 'scanpkgs:::.scan_pkgs()' | R ${R_OPTIONS} --args "$flags" "$args"

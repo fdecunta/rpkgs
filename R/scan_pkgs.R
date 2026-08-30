@@ -2,14 +2,14 @@
 function()
 {
 	args <- commandArgs(TRUE)
-	args <- paste(args, collapse=" ")
+	flags <- args[1L]
+	args <- paste(args[2L], collapse=" ")
 	args <- strsplit(args, "nextArg", fixed=TRUE)[[1L]][-1L]
 
-	# TODO: parse flags
-	Hflag <- FALSE
-	dflag <- FALSE
-	rflag <- FALSE
-	vflag <- TRUE
+	Hflag <- grepl("H", flags)
+	dflag <- grepl("d", flags)
+	rflag <- grepl("r", flags)
+	vflag <- grepl("v", flags)
 
 	pkgs <- lapply(args, .scan_file)
 	names(pkgs) <- args

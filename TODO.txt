@@ -1,1 +1,1 @@
-- Handle .Rmd and .qmd files without intalling all a lot of shit to parse them
+- Handle error when parsing bad formated R code

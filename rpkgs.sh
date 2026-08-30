@@ -1,13 +1,9 @@
 #!/bin/sh
 
-# Scan R pkgs from files.
-#
-# usage:
-
 R_OPTIONS="--no-echo --no-save"
 
 usage() {
-	echo "usage: rpkgs [-dHrv] file ..."
+	echo "usage: rpkgs [-dHrv] file1 ..."
 	echo ""
 	echo "Scan R files for packages used."
 	echo ""
@@ -50,8 +46,10 @@ while test -n "${1}"; do
 	shift
 done
 
+if test -z "${args}"; then
+	echo "error: no files">&2
+	usage>&2
+	exit 1
+fi
 
-Rscript ${R_OPTIONS} scanner.R --args ${args}
-
-
-# R --no-restore --no-echo --args "$args"
+echo 'scanpkgs::scan_pkgs()' | R ${R_OPTIONS} --args "$args"

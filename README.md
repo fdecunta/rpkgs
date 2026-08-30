@@ -38,6 +38,8 @@ Options:
 
 ## Install
 
+After configure `SU` in `Makefile`:
+
 ```
 make install
 ```

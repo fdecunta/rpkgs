@@ -8,10 +8,10 @@ usage() {
 	echo "Scan R files for packages used."
 	echo ""
 	echo "Options:"
-	echo "  -H  print filename for each package"
-	echo "  -d  show dependencies"
-	echo "  -r  show recursive dependencies (implies -d)"
-	echo "  -v  show package version"
+	echo "  -H  print with filename"
+	echo "  -d  dependencies"
+	echo "  -r  recursive dependencies (implies -d)"
+	echo "  -v  package version"
 }
 
 Hflag=
@@ -32,7 +32,7 @@ do
 done
 shift $(($OPTIND - 1))
 
-# The way of parsing args comes from base R scripts (INSTALL, check, etc.) 
+# The weird way of parsing args comes from base R scripts (INSTALL, check, etc.) 
 # 'args' list should be passed as _one_ argument to R, where it is handled
 # with 'commandArgs'. 
 

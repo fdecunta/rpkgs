@@ -1,5 +1,5 @@
-scan_pkgs <-
-function(args=NULL, add_filename=FALSE, dependencies=FALSE, recursive=FALSE, versions=FALSE)
+.scan_pkgs <-
+function()
 {
 	args <- commandArgs(TRUE)
 	args <- paste(args, collapse=" ")

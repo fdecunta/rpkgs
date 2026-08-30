@@ -6,4 +6,4 @@ Date: 2026-08-29
 Author: Facundo Decunta
 Maintainer: Facundo Decunta <fdecunta@agro.uba.ar>
 Description: Scan R files and extract packages used, their versions and dependencies. Design to be used from terminal.
-License: MIT
+License: BSD_3_clause + file LICENSE

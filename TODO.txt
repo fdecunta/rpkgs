@@ -1,3 +1,4 @@
+- Add tests.
 - Add '-' for reading from stdin
 - Handle library when find inside a function
 - Handle error when parsing bad formated R code

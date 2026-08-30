@@ -1,0 +1,6 @@
+./test/p_load_test2.R:dplyr
+./test/p_load_test2.R:knitr
+./test/p_load_test2.R:metafor
+./test/p_load_test2.R:pacman
+./test/p_load_test2.R:readr
+./test/p_load_test2.R:readxl

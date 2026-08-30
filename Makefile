@@ -1,3 +1,5 @@
+SU = doas
+
 PROG = rpkgs
 BIN  = /usr/local/bin
 
@@ -17,11 +19,11 @@ installpkg: clean $(TAR)
 
 install: installpkg $(PROG)
 	R CMD INSTALL $(TAR)
-	sudo mv ./$(PROG) $(BIN)
+	$(SU) mv ./$(PROG) $(BIN)
 
 remove:
 	R CMD REMOVE $(PKG)
-	sudo rm -f $(BIN)/$(PROG)
+	$(SU) rm -f $(BIN)/$(PROG)
 
 check: $(TAR)
 	R CMD check $(TAR)

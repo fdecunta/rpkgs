@@ -15,7 +15,12 @@ function()
 	names(pkgs) <- args
 
 	if (dflag) {
-		deps <- tools::package_dependencies(unlist(unique(pkgs)), recursive = rflag)
+		pdb <- available.packages(repos = findCRANmirror("web"))
+		deps <- tools::package_dependencies(
+			unlist(unique(pkgs)),
+			recursive = rflag,
+			db = pdb
+		)
 		names(deps) <- unlist(unique(pkgs))
 	} 
 

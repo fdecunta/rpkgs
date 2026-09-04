@@ -33,3 +33,15 @@ function(f)
 	all_pkgs <- unique(unlist(lapply(parsed, .find_pkgs)))
 	unique(all_pkgs)
 }
+.println <-
+function(s)
+{
+	tryCatch(
+		writeLines(s),
+		error = function(e) {
+			# ignore SIGPIPE signal. 
+			# eg. 'rpks *.R | head -5' produces that
+			if (!grepl("ignoring SIGPIPE signal", e$message)) stop(e)
+		}
+	)
+}

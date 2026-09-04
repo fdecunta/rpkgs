@@ -45,10 +45,10 @@ function()
 					dline <- paste(line, d, sep=":")
 					if (vflag) 
 						dline <- paste(dline, version[[d]], sep=":")
-					writeLines(dline)
+					.println(dline)
 				}
 			} else {
-				writeLines(line)
+				.println(line)
 			}
 		}
 	}

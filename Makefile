@@ -1,4 +1,4 @@
-SU = doas
+SU = sudo
 
 PROG = rpkgs
 BIN  = /usr/local/bin
